@@ -1,7 +1,7 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
-const {viewAllDepartments,viewAllRoles,viewAllEmployees,addADepartment,addARole,addAnEmployee,updateAnEmployeeRole,quit} = require('../utils/primaryFunctions');
+const { viewAllDepartments, viewAllRoles, viewAllEmployees, addADepartment, addARole, addAnEmployee, updateAnEmployeeRole, quit } = require('../utils/primaryFunctions');
 
 //create connection to database
 const db = mysql.createConnection({
@@ -30,10 +30,10 @@ promptUser = () => {
     ]).then(res => userResponseHandler(res));
 };
 
-userResponseHandler = (res) => {
-    console.log(res.openingList);
+userResponseHandler = async (res) => {
     const userResponse = res.openingList;
 
+    //switch containing all possible responses
     switch (userResponse) {
         case 'View All Departments':
             viewAllDepartments();
@@ -102,11 +102,14 @@ userResponseHandler = (res) => {
             ]).then(ans => addAnEmployee(ans));
             break;
         case 'Update An Employee Role':
+            let employees = await db.promise().query('SELECT first_name, last_name FROM employees');
+
             inquirer.prompt([
                 {
-                    type: 'input',
+                    type: 'list',
                     name: 'employee_id',
-                    message: "Please enter the employee's id."
+                    message: "Please select the employee you wish to update.",
+                    choices: employees.map(ans => ans.first_name)
                 },
                 {
                     type: 'input',
@@ -116,9 +119,9 @@ userResponseHandler = (res) => {
             ]).then(ans => updateAnEmployeeRole(ans));
             break;
 
-        case 'Quit':
+        default:
+            console.log("Goodbye");
             db.end();
-            break;
     }
 }
 

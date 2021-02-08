@@ -17,6 +17,7 @@ viewAllDepartments = () => {
         function (err, res) {
             if (err) throw err;
             console.table(res);
+            promptUser();
         }
     )
 };
@@ -29,6 +30,7 @@ viewAllRoles = () => {
         function (err, res) {
             if (err) throw err;
             console.table(res);
+            promptUser();
         }
     )
 };
@@ -41,6 +43,7 @@ viewAllEmployees = () => {
         function (err, res) {
             if (err) throw err;
             console.table(res);
+            promptUser();
         }
     )
 };
@@ -53,6 +56,7 @@ addADepartment = (ans) => {
         function (err, res) {
             if (err) throw err;
             console.log(res.affectedRows + ' department added!\n');
+            promptUser();
         }
     )
 };
@@ -71,6 +75,7 @@ addARole = (ans) => {
         function (err, res) {
             if (err) throw err;
             console.log(res.affectedRows + ' role added!\n');
+            promptUser();
         }
     )
 };
@@ -90,6 +95,7 @@ addAnEmployee = (ans) => {
         function (err, res) {
             if (err) throw err;
             console.log(res.affectedRows + ' employee added!\n');
+            promptUser();
         }
     )
 };
@@ -107,6 +113,7 @@ updateAnEmployeeRole = (ans) => {
         function (err, res) {
             if (err) throw err;
             console.log(res.affectedRows + " employee's role updated!\n");
+            promptUser();
         }
     )
 };
