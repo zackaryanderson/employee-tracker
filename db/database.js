@@ -56,6 +56,7 @@ function getManagers () {
             let fullName = res[i].first_name.concat(' ',res[i].last_name);
             managerList.push(fullName);
         }
+        managerList.push('NULL');
     })
     return managerList
 };
