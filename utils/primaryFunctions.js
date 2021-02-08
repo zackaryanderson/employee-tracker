@@ -1,8 +1,6 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
-//const getRoles = require('../db/database');
-const getManagers = require('../db/database');
 
 const db = mysql.createConnection({
     host: 'localhost',
@@ -12,7 +10,7 @@ const db = mysql.createConnection({
 });
 
 //get roles for selection
-let rolesList = [];
+rolesList = [];
 function getRoles () {
     rolesList = [];
     db.query('SELECT * FROM roles',
@@ -25,6 +23,21 @@ function getRoles () {
     )
     return rolesList;
 }
+
+//get managers for selection
+let managerList = [];
+function getManagers () {
+    managerList = [];
+    db.query('SELECT first_name, last_name FROM employees WHERE manager_id IS NULL',
+    function (err, res) {
+        if (err) throw err;
+        for (var i = 0; i < res.length; i++){
+            let fullName = res.first_name.concat(res.last_name);
+            managerList.push(fullName);
+        }
+    })
+    return managerList
+};
 
 //view all departments
 viewAllDepartments = () => {
@@ -43,7 +56,7 @@ viewAllDepartments = () => {
 viewAllRoles = () => {
     console.log("Viewing all roles");
     db.query(
-        'SELECT * FROM roles',
+        'SELECT roles.id, roles.title, roles.salary, department.name AS department FROM roles INNER JOIN department ON roles.department_id = department.departmentId',
         function (err, res) {
             if (err) throw err;
             console.table(res);
@@ -56,7 +69,7 @@ viewAllRoles = () => {
 viewAllEmployees = () => {
     console.log("Viewing all employees");
     db.query(
-        'SELECT * FROM employees',
+        "SELECT employees.id, employees.first_name, employees.last_name, roles.title, department.name, roles.salary, CONCAT(m.first_name, ' ',m.last_name) AS manager FROM employees LEFT JOIN roles ON employees.role_id = roles.id LEFT JOIN department ON roles.department_id = departmentId LEFT JOIN employees m ON employees.manager_id = m.id",
         function (err, res) {
             if (err) throw err;
             console.table(res);
@@ -119,21 +132,27 @@ addAnEmployee = (ans) => {
 
 //update an employee
 updateAnEmployeeRole = (ans) => { 
-    console.log(ans);
     let lastName = (ans.last_name);
-    //let newRole = parseInt(ans.employee_role);
-    let newRole = getRoles().indexOf(ans.role_id) + 2;
-    console.log(newRole);
-    db.query(
-        'UPDATE employees SET ? WHERE ?',
-        [
-            {role_id: newRole},
-            {last_name: lastName}
-        ],
-        function (err, res) {
+    rolesList = [];
+    db.query('SELECT * FROM roles',
+        function(err, res) {
             if (err) throw err;
-            console.log(res.affectedRows + " employee's role updated!\n");
-            promptUser();
+            for (var i = 0; i < res.length; i++){
+                rolesList.push(res[i].title);
+            }
+            newRole = rolesList.indexOf(ans.role_id) + 1;
+            db.query(
+                'UPDATE employees SET ? WHERE ?',
+                [
+                    {role_id: newRole},
+                    {last_name: lastName}
+                ],
+                function (err, res) {
+                    if (err) throw err;
+                    console.log(res.affectedRows + " employee's role updated!\n");
+                    promptUser();
+                }
+            )
         }
     )
 };

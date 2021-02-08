@@ -48,6 +48,16 @@ function getRoles () {
 //get managers for selection
 let managerList = [];
 function getManagers () {
+    managerList = [];
+    db.query('SELECT first_name, last_name FROM employees WHERE manager_id IS NULL',
+    function (err, res) {
+        if (err) throw err;
+        for (var i = 0; i < res.length; i++){
+            let fullName = res.first_name.concat(res.last_name);
+            managerList.push(fullName);
+        }
+    })
+    return managerList
 };
 
 userResponseHandler = (res) => {
