@@ -30,7 +30,27 @@ promptUser = () => {
     ]).then(res => userResponseHandler(res));
 };
 
-userResponseHandler = async (res) => {
+//get roles for selection
+let rolesList = [];
+function getRoles () {
+    rolesList = [];
+    db.query('SELECT * FROM roles',
+        function(err, res) {
+            if (err) throw err;
+            for (var i = 0; i < res.length; i++){
+                rolesList.push(res[i].title);
+            }
+        }
+    )
+    return rolesList;
+}
+
+//get managers for selection
+let managerList = [];
+function getManagers () {
+};
+
+userResponseHandler = (res) => {
     const userResponse = res.openingList;
 
     //switch containing all possible responses
@@ -47,6 +67,7 @@ userResponseHandler = async (res) => {
             viewAllEmployees();
             break;
 
+        //add a department
         case 'Add A Department':
             inquirer.prompt([
                 {
@@ -57,6 +78,7 @@ userResponseHandler = async (res) => {
             ]).then(ans => addADepartment(ans))
             break;
 
+        //add a role
         case 'Add A Role':
             inquirer.prompt([
                 {
@@ -77,6 +99,7 @@ userResponseHandler = async (res) => {
             ]).then(ans => addARole(ans));
             break;
 
+        //add an employee
         case 'Add An Employee':
             inquirer.prompt([
                 {
@@ -101,22 +124,33 @@ userResponseHandler = async (res) => {
                 }
             ]).then(ans => addAnEmployee(ans));
             break;
-        case 'Update An Employee Role':
-            let employees = await db.promise().query('SELECT first_name, last_name FROM employees');
 
-            inquirer.prompt([
-                {
-                    type: 'list',
-                    name: 'employee_id',
-                    message: "Please select the employee you wish to update.",
-                    choices: employees.map(ans => ans.first_name)
-                },
-                {
-                    type: 'input',
-                    name: 'employee_role',
-                    message: "Please enter the employee's updated role."
-                }
-            ]).then(ans => updateAnEmployeeRole(ans));
+        // update an employee role
+        case 'Update An Employee Role':
+            db.query("SELECT last_name FROM employees",
+                function (err, res) {
+                    if (err) throw err;
+                    inquirer.prompt([
+                        {
+                            type: 'list',
+                            name: 'last_name',
+                            choices: function () {
+                                var employeeName = [];
+                                for (var i = 0; i < res.length; i++) {
+                                    employeeName.push(res[i].last_name);
+                                }
+                                return employeeName
+                            },
+                            message: "Please select the employee you wish to update."
+                        },
+                        {
+                            type: 'list',
+                            name: 'role_id',
+                            choices: getRoles(),
+                            message: "Please enter the employee's updated role."
+                        }
+                    ]).then(ans => updateAnEmployeeRole(ans));
+                });
             break;
 
         default:
@@ -126,4 +160,8 @@ userResponseHandler = async (res) => {
 }
 
 
-module.exports = db;
+module.exports = {
+    db, 
+    getRoles,
+    getManagers
+};

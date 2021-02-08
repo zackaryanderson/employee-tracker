@@ -1,6 +1,8 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
+//const getRoles = require('../db/database');
+const getManagers = require('../db/database');
 
 const db = mysql.createConnection({
     host: 'localhost',
@@ -8,6 +10,21 @@ const db = mysql.createConnection({
     password: 'zack98**',
     database: 'employee_tracker'
 });
+
+//get roles for selection
+let rolesList = [];
+function getRoles () {
+    rolesList = [];
+    db.query('SELECT * FROM roles',
+        function(err, res) {
+            if (err) throw err;
+            for (var i = 0; i < res.length; i++){
+                rolesList.push(res[i].title);
+            }
+        }
+    )
+    return rolesList;
+}
 
 //view all departments
 viewAllDepartments = () => {
@@ -102,13 +119,16 @@ addAnEmployee = (ans) => {
 
 //update an employee
 updateAnEmployeeRole = (ans) => { 
-    let employeeId = parseInt(ans.employee_id);
-    let newRole = parseInt(ans.employee_role);
+    console.log(ans);
+    let lastName = (ans.last_name);
+    //let newRole = parseInt(ans.employee_role);
+    let newRole = getRoles().indexOf(ans.role_id) + 2;
+    console.log(newRole);
     db.query(
         'UPDATE employees SET ? WHERE ?',
         [
             {role_id: newRole},
-            {id: employeeId}
+            {last_name: lastName}
         ],
         function (err, res) {
             if (err) throw err;
