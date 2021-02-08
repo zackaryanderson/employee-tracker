@@ -94,18 +94,28 @@ addADepartment = (ans) => {
 //add a role
 addARole = (ans) => { 
     let salary = parseInt(ans.salary);
-    let departmentId = parseInt(ans.department_id);
+    departmentList = [];
     db.query(
-        'INSERT INTO roles SET ?',
-        {
-            title: ans.title,
-            salary: salary,
-            department_id: departmentId
-        },
+        'SELECT * FROM department',
         function (err, res) {
             if (err) throw err;
-            console.log(res.affectedRows + ' role added!\n');
-            promptUser();
+            for (var i = 0; i < res.length; i++){
+                departmentList.push(res[i].name);
+            }
+            departmentId = departmentList.indexOf(ans.department_name) + 1;
+            db.query(
+                'INSERT INTO roles SET ?',
+                {
+                    title: ans.title,
+                    salary: salary,
+                    department_id: departmentId
+                },
+                function (err, res) {
+                    if (err) throw err;
+                    console.log(res.affectedRows + ' role added!\n');
+                    promptUser();
+                }
+            )
         }
     )
 };

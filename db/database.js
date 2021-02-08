@@ -90,24 +90,35 @@ userResponseHandler = (res) => {
 
         //add a role
         case 'Add A Role':
-            inquirer.prompt([
-                {
-                    type: 'input',
-                    name: 'title',
-                    message: 'Please enter the role title.'
-                },
-                {
-                    type: 'input',
-                    name: 'salary',
-                    message: "Please enter the role's salary."
-                },
-                {
-                    type: 'input',
-                    name: 'department_id',
-                    message: "Please enter the role's department id."
-                },
-            ]).then(ans => addARole(ans));
-            break;
+            db.query("SELECT department.name FROM department",
+                function (err, res) {
+                    if (err) throw err;
+                    inquirer.prompt([
+                        {
+                            type: 'input',
+                            name: 'title',
+                            message: 'Please enter the role title.'
+                        },
+                        {
+                            type: 'input',
+                            name: 'salary',
+                            message: "Please enter the role's salary."
+                        },
+                        {
+                            type: 'list',
+                            name: 'department_name',
+                            choices: function () {
+                                var departmentName = [];
+                                for (var i = 0; i < res.length; i++) {
+                                    departmentName.push(res[i].name);
+                                }
+                                return departmentName
+                            },
+                            message: "Please select the roles department."
+                        },
+                    ]).then(ans => addARole(ans));
+                })
+                    break;
 
         //add an employee
         case 'Add An Employee':
