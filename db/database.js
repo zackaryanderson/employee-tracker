@@ -53,7 +53,7 @@ function getManagers () {
     function (err, res) {
         if (err) throw err;
         for (var i = 0; i < res.length; i++){
-            let fullName = res.first_name.concat(res.last_name);
+            let fullName = res[i].first_name.concat(' ',res[i].last_name);
             managerList.push(fullName);
         }
     })
@@ -134,14 +134,16 @@ userResponseHandler = (res) => {
                     message: "Please enter the employee's last name."
                 },
                 {
-                    type: 'input',
-                    name: 'role_id',
-                    message: "Please enter the employee's role id."
+                    type: 'list',
+                    name: 'role_name',
+                    choices: getRoles(),
+                    message: "Please select the employee's role."
                 },
                 {
-                    type: 'input',
-                    name: 'manager_id',
-                    message: "Please enter the employee's manager id."
+                    type: 'list',
+                    name: 'manager_name',
+                    choices: getManagers(),
+                    message: "Please select the employee's manager."
                 }
             ]).then(ans => addAnEmployee(ans));
             break;

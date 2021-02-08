@@ -69,7 +69,7 @@ viewAllRoles = () => {
 viewAllEmployees = () => {
     console.log("Viewing all employees");
     db.query(
-        "SELECT employees.id, employees.first_name, employees.last_name, roles.title, department.name, roles.salary, CONCAT(m.first_name, ' ',m.last_name) AS manager FROM employees LEFT JOIN roles ON employees.role_id = roles.id LEFT JOIN department ON roles.department_id = departmentId LEFT JOIN employees m ON employees.manager_id = m.id",
+        "SELECT employees.id, employees.first_name, employees.last_name, roles.title, department.name AS department, roles.salary, CONCAT(m.first_name, ' ',m.last_name) AS manager FROM employees LEFT JOIN roles ON employees.role_id = roles.id LEFT JOIN department ON roles.department_id = departmentId LEFT JOIN employees m ON employees.manager_id = m.id",
         function (err, res) {
             if (err) throw err;
             console.table(res);
@@ -122,20 +122,42 @@ addARole = (ans) => {
 
 //add an employee
 addAnEmployee = (ans) => { 
-    let roleId = ans.role_id;
-    let managerId = ans.manager_id;
+    let roleName = ans.role_name;
+    let managerNameArr = ans.manager_name.split(' ');
+    let managerName = managerNameArr[1];
+    managerList = [];
+    managerIdList = [];
+    roleList = [];
+    roleIdList = [];
     db.query(
-        'INSERT INTO employees SET ?',
-        {
-            first_name: ans.first_name,
-            last_name: ans.last_name,
-            role_id: roleId,
-            manager_id: managerId
-        },
+        'SELECT employees.last_name, employees.id, roles.title, roles.id AS roles_id FROM employees JOIN roles',
         function (err, res) {
             if (err) throw err;
-            console.log(res.affectedRows + ' employee added!\n');
-            promptUser();
+            for (var i = 0; i < res.length; i++){
+                managerList.push(res[i].last_name);
+                managerIdList.push(res[i].id);
+                roleList.push(res[i].title);
+                roleIdList.push(res[i].roles_id);
+            }
+            let managerIdLoc = managerList.indexOf(managerName);
+            let managerId = managerIdList[managerIdLoc];
+            let roleIdLoc = roleList.indexOf(roleName);
+            let roleId = roleIdList[roleIdLoc]; 
+            console.log(roleId);
+            db.query(
+                'INSERT INTO employees SET ?',
+                {
+                    first_name: ans.first_name,
+                    last_name: ans.last_name,
+                    role_id: roleId,
+                    manager_id: managerId
+                },
+                function (err, res) {
+                    if (err) throw err;
+                    console.log(res.affectedRows + ' employee added!\n');
+                    promptUser();
+                }
+            )
         }
     )
 };
